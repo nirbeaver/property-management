@@ -53,13 +53,6 @@ npm run dev
 - `npm run type-check` - Run TypeScript type checking
 - `npm run deploy` - Build and deploy to Firebase hosting
 
-## Deployment
-
-The application is deployed on Firebase Hosting and can be accessed at:
-[https://property-management-bfe6d.web.app/](https://property-management-bfe6d.web.app/)
-
-Deployment is automated through GitHub Actions. Every push to the main branch triggers a new deployment.
-
 ## License
 
 MIT
