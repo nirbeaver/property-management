@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#F7FAFC"/>
+  
+  <!-- Logo -->
+  <g transform="translate(400, 115) scale(2)">
+    <!-- Background Circle -->
+    <circle cx="100" cy="100" r="95" fill="#2B6CB0"/>
+    
+    <!-- House Shape -->
+    <path d="M100 40L160 90V160H40V90L100 40Z" fill="white"/>
+    
+    <!-- Windows -->
+    <rect x="60" y="110" width="25" height="25" fill="#2B6CB0"/>
+    <rect x="115" y="110" width="25" height="25" fill="#2B6CB0"/>
+    
+    <!-- Door -->
+    <rect x="85" y="120" width="30" height="40" fill="#2B6CB0"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="600" y="500" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="72" fill="#2B6CB0">LX3HOME</text>
+  <text x="600" y="560" text-anchor="middle" font-family="Arial" font-size="36" fill="#4A5568">Smart Property Management Solution</text>
+</svg>

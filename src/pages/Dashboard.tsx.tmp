@@ -1,0 +1,248 @@
+import { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Heading,
+  SimpleGrid,
+  Text,
+  VStack,
+  HStack,
+  Icon,
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Link,
+} from "@chakra-ui/react";
+import {
+  Building2,
+  DollarSign,
+  Home,
+  Users,
+  AlertTriangle,
+  Clock,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+
+interface Property {
+  id: string;
+  name: string;
+  address: string;
+  units: number;
+  occupiedUnits: number;
+  monthlyRevenue: number;
+}
+
+interface Transaction {
+  id: string;
+  propertyName: string;
+  type: string;
+  amount: number;
+  date: string;
+  description: string;
+}
+
+interface Lease {
+  id: string;
+  propertyName: string;
+  unit: string;
+  tenantName: string;
+  expiryDate: string;
+}
+
+const Dashboard = () => {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [expiringLeases, setExpiringLeases] = useState<Lease[]>([]);
+
+  useEffect(() => {
+    // Load data from localStorage
+    const storedProperties = localStorage.getItem('properties');
+    const storedTransactions = localStorage.getItem('transactions');
+    const storedLeases = localStorage.getItem('leases');
+
+    if (storedProperties) {
+      setProperties(JSON.parse(storedProperties));
+    }
+    if (storedTransactions) {
+      setTransactions(JSON.parse(storedTransactions));
+    }
+    if (storedLeases) {
+      const leases = JSON.parse(storedLeases);
+      // Filter leases expiring in next 30 days
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      setExpiringLeases(
+        leases.filter((lease: Lease) => new Date(lease.expiryDate) <= thirtyDaysFromNow)
+      );
+    }
+  }, []);
+
+  // Calculate dashboard stats
+  const totalProperties = properties.length;
+  const totalUnits = properties.reduce((sum, p) => sum + p.units, 0);
+  const occupiedUnits = properties.reduce((sum, p) => sum + p.occupiedUnits, 0);
+  const monthlyRevenue = properties.reduce((sum, p) => sum + p.monthlyRevenue, 0);
+
+  return (
+    <Container maxW="container.xl" py={6}>
+      {/* Lease Expiration Alerts */}
+      {expiringLeases.length > 0 && (
+        <Box bg="yellow.50" p={4} rounded="md" mb={6}>
+          <HStack spacing={2} color="yellow.800">
+            <Icon as={AlertTriangle} />
+            <Text fontWeight="medium">
+              Lease Expiration Alerts ({expiringLeases.length} in 30 Days)
+            </Text>
+          </HStack>
+          <VStack align="stretch" mt={2} pl={6}>
+            {expiringLeases.map((lease) => (
+              <Text key={lease.id} fontSize="sm">
+                {lease.propertyName} - Unit {lease.unit} ({lease.tenantName}) expires in{" "}
+                {Math.ceil(
+                  (new Date(lease.expiryDate).getTime() - new Date().getTime()) /
+                    (1000 * 60 * 60 * 24)
+                )}{" "}
+                days
+              </Text>
+            ))}
+          </VStack>
+        </Box>
+      )}
+
+      {/* Stats Overview */}
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>Total Properties</StatLabel>
+              <HStack align="baseline">
+                <Icon as={Building2} color="blue.500" />
+                <StatNumber>{totalProperties}</StatNumber>
+              </HStack>
+              <StatHelpText>{totalUnits} total units</StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>Monthly Revenue</StatLabel>
+              <HStack align="baseline">
+                <Icon as={DollarSign} color="green.500" />
+                <StatNumber>${monthlyRevenue.toLocaleString()}</StatNumber>
+              </HStack>
+              <StatHelpText color="red.500">-$350 net</StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>Total Units</StatLabel>
+              <HStack align="baseline">
+                <Icon as={Home} color="purple.500" />
+                <StatNumber>{totalUnits}</StatNumber>
+              </HStack>
+              <StatHelpText color="green.500">200% occupied</StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody>
+            <Stat>
+              <StatLabel>Occupied Units</StatLabel>
+              <HStack align="baseline">
+                <Icon as={Users} color="orange.500" />
+                <StatNumber>{occupiedUnits}</StatNumber>
+              </HStack>
+              <StatHelpText color="red.500">-2 vacant units</StatHelpText>
+            </Stat>
+          </CardBody>
+        </Card>
+      </SimpleGrid>
+
+      {/* Properties Overview */}
+      <Box mb={8}>
+        <Heading size="md" mb={4}>Properties Overview</Heading>
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+          {properties.map((property) => (
+            <Card key={property.id}>
+              <CardBody>
+                <VStack align="stretch" spacing={3}>
+                  <HStack justify="space-between">
+                    <Heading size="sm">{property.name}</Heading>
+                    <Button size="sm" variant="outline" colorScheme="blue">
+                      View Details
+                    </Button>
+                  </HStack>
+                  <Text fontSize="sm" color="gray.600">{property.address}</Text>
+                  <HStack justify="space-between">
+                    <Text fontSize="sm">
+                      {property.occupiedUnits}/{property.units} Units
+                    </Text>
+                    <Badge colorScheme="green">
+                      {Math.round((property.occupiedUnits / property.units) * 100)}% Occupied
+                    </Badge>
+                  </HStack>
+                  <HStack justify="space-between">
+                    <Text fontSize="sm">Monthly Revenue</Text>
+                    <Text fontWeight="medium">${property.monthlyRevenue.toLocaleString()}</Text>
+                  </HStack>
+                </VStack>
+              </CardBody>
+            </Card>
+          ))}
+        </SimpleGrid>
+      </Box>
+
+      {/* Recent Activity */}
+      <Box>
+        <Heading size="md" mb={4}>Recent Activity</Heading>
+        <VStack align="stretch" spacing={4}>
+          {transactions.slice(0, 5).map((transaction) => (
+            <Card key={transaction.id}>
+              <CardBody>
+                <HStack justify="space-between">
+                  <VStack align="start" spacing={1}>
+                    <HStack>
+                      <Icon
+                        as={transaction.type === 'Expense' ? ArrowDownRight : ArrowUpRight}
+                        color={transaction.type === 'Expense' ? 'red.500' : 'green.500'}
+                      />
+                      <Text fontWeight="medium">{transaction.description}</Text>
+                    </HStack>
+                    <Text fontSize="sm" color="gray.600">
+                      {transaction.propertyName}
+                    </Text>
+                  </VStack>
+                  <VStack align="end" spacing={1}>
+                    <Text
+                      fontWeight="medium"
+                      color={transaction.type === 'Expense' ? 'red.500' : 'green.500'}
+                    >
+                      {transaction.type === 'Expense' ? '-' : '+'}${Math.abs(transaction.amount).toLocaleString()}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      {new Date(transaction.date).toLocaleDateString()}
+                    </Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+          ))}
+        </VStack>
+      </Box>
+    </Container>
+  );
+};
+
+export default Dashboard;
